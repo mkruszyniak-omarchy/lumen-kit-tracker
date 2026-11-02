@@ -1,0 +1,4 @@
+# Keep flash images and audio byte-exact; Intel HEX CRLF is intentional.
+*.ptf binary
+*.ptfx binary
+*.wav binary

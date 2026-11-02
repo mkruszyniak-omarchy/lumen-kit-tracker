@@ -39,7 +39,9 @@ class Synth
                                                 polysynth::InstrumentTypeId::kVASynth,
                                                 polysynth::InstrumentTypeId::kFMSynth,
                                                 polysynth::InstrumentTypeId::kDrumSynth,
-                                                polysynth::InstrumentTypeId::kShapingSynth, polysynth::InstrumentTypeId::kChiptuneSynth };
+                                                polysynth::InstrumentTypeId::kShapingSynth,
+                                                polysynth::InstrumentTypeId::kChiptuneSynth,
+                                                polysynth::InstrumentTypeId::kDrumKitSynth };
     static constexpr auto kInitPatchName = "Init";
 
     Synth();
@@ -48,6 +50,13 @@ class Synth
     void init(Platform* platform, std::function<tiny::optional<float>()> getTempo);
 
     ::Midi* getVirtualMidiPort();
+
+    bool isDrumKit(int part) const;
+    void activateDrumKitTrack(int part, int track, int note);
+    bool seqDrumKitFx(int part, int track, int note, int fxId, int value, int slot);
+    void resetDrumKitFx(int part);
+    void stopDrumKitNote(int part, int note);
+    void stopDrumKits();
 
     std::vector<std::string_view> getPatchList(int part);
     [[nodiscard]] bool loadPatch(int part, const char* name);

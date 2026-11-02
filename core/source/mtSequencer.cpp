@@ -3,6 +3,7 @@
 
 #ifdef FEATURE_SYNTH
 #include "Synth.h"
+#include "TrackerImpl.h"
 #endif
 #include "fileManager.h"
 #include "mtAudioEngine.h"
@@ -388,7 +389,14 @@ AUDIO_CORE_FLASH void Sequencer::play_microStep(int row)
     if (!playerRow.isActive)
         return;
     if (isTrackEngineMuted(row))
+    {
+#ifdef FEATURE_SYNTH
+        if (isSynthInstrument(playerRow.stepSent.instrument))
+            TrackerImpl::getInstance()->getSynth().stopDrumKitNote(
+              instrumentIdxToMidiChannel(playerRow.stepSent.instrument) - 1, playerRow.stepSent.note);
+#endif
         return;
+    }
 
     // ************************************
     // 		 PRE EFEKTY i operacje na uStep == 1
@@ -505,7 +513,9 @@ AUDIO_CORE_FLASH void Sequencer::play_microStep(int row)
                 int synthIdx = instrumentIdxToMidiChannel(stepToSend.instrument) - 1;
                 assert(!isOutOfRange(synthIdx, 0, kSynthParts - 1));
 
-                engine.seqSynthFx(_fx.type, _fx.value, fxIndex, synthIdx);
+                if (!TrackerImpl::getInstance()->getSynth().seqDrumKitFx(
+                      synthIdx, row, stepToSend.note, _fx.type, _fx.value, fxIndex))
+                    engine.seqSynthFx(_fx.type, _fx.value, fxIndex, synthIdx);
 
                 continue;
             }
@@ -559,7 +569,9 @@ AUDIO_CORE_FLASH void Sequencer::play_microStep(int row)
                         int synthIdx = instrumentIdxToMidiChannel(stepSent.instrument) - 1;
                         assert(!isOutOfRange(synthIdx, 0, kSynthParts - 1));
 
-                        engine.seqSynthFx(_fx.type, 0, fxIndex, synthIdx);
+                        if (!TrackerImpl::getInstance()->getSynth().seqDrumKitFx(
+                              synthIdx, row, stepSent.note, _fx.type, 0, fxIndex))
+                            engine.seqSynthFx(_fx.type, 0, fxIndex, synthIdx);
                     }
                     else
 #endif
@@ -761,7 +773,9 @@ AUDIO_CORE_FLASH void Sequencer::play_microStep(int row)
                             int synthIdx = instrumentIdxToMidiChannel(stepSent.instrument) - 1;
                             assert(!isOutOfRange(synthIdx, 0, kSynthParts - 1));
 
-                            engine.seqSynthFx(_fx.type, _fx.value, fxIndex, synthIdx);
+                            if (!TrackerImpl::getInstance()->getSynth().seqDrumKitFx(
+                                  synthIdx, row, stepSent.note, _fx.type, _fx.value, fxIndex))
+                                engine.seqSynthFx(_fx.type, _fx.value, fxIndex, synthIdx);
                         }
                         else
 #endif
@@ -1543,6 +1557,9 @@ AUDIO_CORE_RAM void Sequencer::stopManualNotes(void)
 void Sequencer::stop(void)
 {
     songTimer.stop();
+#ifdef FEATURE_SYNTH
+    TrackerImpl::getInstance()->getSynth().stopDrumKits();
+#endif
     stopAllOpenNotes();
     cancelFxes();
 
@@ -2429,6 +2446,12 @@ AUDIO_CORE_RAM void Sequencer::sendNoteOn(uint8_t track,
         return;
     }
 
+#ifdef FEATURE_SYNTH
+    if (toSynth)
+        TrackerImpl::getInstance()->getSynth().activateDrumKitTrack(
+          instrumentIdxToMidiChannel(step->instrument) - 1, track, step->note);
+#endif
+
     if (toMidi || toSynth)
     {
         if ((step->fx[0].type == fx.FX_TYPE_MIDI_CHORD && step->fx[1].type != fx.FX_TYPE_ARP) ||
@@ -2479,6 +2502,11 @@ AUDIO_CORE_RAM void Sequencer::sendNoteOff(uint8_t track,
     bool isSynth = isSynthInstrument(instrument);
     if (isMidi || isSynth)
     {
+#ifdef FEATURE_SYNTH
+        if (isSynth && (offOption == STEP_NOTE_OFF_CUT || offOption == STEP_NOTE_OFF_FADE))
+            TrackerImpl::getInstance()->getSynth().stopDrumKitNote(
+              instrumentIdxToMidiChannel(instrument) - 1, step->note);
+#endif
         if ((step->fx[0].type == fx.FX_TYPE_MIDI_CHORD && step->fx[1].type != fx.FX_TYPE_ARP) ||
             (step->fx[1].type == fx.FX_TYPE_MIDI_CHORD && step->fx[0].type != fx.FX_TYPE_ARP))
         {
@@ -2558,6 +2586,21 @@ AUDIO_CORE_FLASH void Sequencer::handleNoteOn(
     {
         velocity = 127;
     }
+
+#ifdef FEATURE_SYNTH
+    // Preview KIT directly: Song playback may have every sequencer track occupied.
+    // Preserve the ordinary path in REC so live input can still record notes.
+    if (channel == GRID_OUTSIDE_PATTERN && !isRec() &&
+        isSynthInstrument(mtProject.values.lastUsedInstrument))
+    {
+        const int part = instrumentIdxToSynthIdx(mtProject.values.lastUsedInstrument);
+        if (TrackerImpl::getInstance()->getSynth().isDrumKit(part))
+        {
+            sendMidiNoteOn(note, velocity, part + 1, true);
+            return;
+        }
+    }
+#endif
 
     strSelection* sel = &selection;
     if (!isSelectionCorrect(sel))
@@ -2861,6 +2904,21 @@ void Sequencer::handleNoteOff(byte channel, // pochodzenie grida np. GRID_OUTSID
                               [[maybe_unused]] byte velocity,
                               int16_t source) // nr pada, jesli midi to source = nuta+100,
 {
+#ifdef FEATURE_SYNTH
+    // Preview KIT directly: Song playback may have every sequencer track occupied.
+    // Preserve the ordinary path in REC so live input can still record notes.
+    if (channel == GRID_OUTSIDE_PATTERN && !isRec() &&
+        isSynthInstrument(mtProject.values.lastUsedInstrument))
+    {
+        const int part = instrumentIdxToSynthIdx(mtProject.values.lastUsedInstrument);
+        if (TrackerImpl::getInstance()->getSynth().isDrumKit(part))
+        {
+            sendMidiNoteOff(note, 0, part + 1, true);
+            return;
+        }
+    }
+#endif
+
     strSelection* sel = &selection;
     if (!isSelectionCorrect(sel))
         return;

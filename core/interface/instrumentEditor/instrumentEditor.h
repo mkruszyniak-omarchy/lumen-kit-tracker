@@ -9,6 +9,7 @@
 
 #if GUI_HANDLE_SYNTH
 #include "Synth.h"
+#include "engines/DrumKitNotes.h"
 #endif
 #include <map>
 
@@ -386,6 +387,7 @@ class cInstrumentEditor : public ModuleBase
     // synth
     static constexpr int kSynthPreviewNote1 = 60 - 2 * 12;
     static constexpr int kSynthPreviewNote2 = 60;
+    polysynth::drumkit::PreviewLatch kitPreview;
 
     char synthPatchNameText[45];
     char* patchfileNamesBuffer;

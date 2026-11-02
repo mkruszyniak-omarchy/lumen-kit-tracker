@@ -18,7 +18,8 @@
 const char* const OffOnNames[] = { "Off", "On" };
 static const int synthModelListImages[Synth::kSynthTypes.size()] = {
     enDisplayBitmaps::kBitmapACD,  enDisplayBitmaps::kBitmapFAT,  enDisplayBitmaps::kBitmapVAP,
-    enDisplayBitmaps::kBitmapWTFM, enDisplayBitmaps::kBitmapPERC, enDisplayBitmaps::kBitmapDIRT, enDisplayBitmaps::kBitmapCHIP
+    enDisplayBitmaps::kBitmapWTFM, enDisplayBitmaps::kBitmapPERC, enDisplayBitmaps::kBitmapDIRT,
+    enDisplayBitmaps::kBitmapCHIP, enDisplayBitmaps::kBitmapKIT
 };
 
 static cInstrumentEditor* IE = &instrumentEditor;
@@ -1284,6 +1285,14 @@ void cInstrumentEditor::showSynthPatchSection(bool refreshList)
                     shortName = "";
                     number = 0;
                     sectionImgList[idx] = -1;
+                }
+
+                if (metadata.instrumentTypeId ==
+                    static_cast<int>(polysynth::InstrumentTypeId::kDrumKitSynth))
+                {
+                    // KIT supplies unique note labels for its two hi-hats and other drums.
+                    shortName = section.shortName.c_str();
+                    number = 0;
                 }
 
                 sectionNamesList[idx] = &sectionNamesGridBuff[kMaxSynthGridStringLen * idx];

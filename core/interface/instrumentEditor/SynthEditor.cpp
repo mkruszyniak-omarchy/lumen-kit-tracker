@@ -22,14 +22,15 @@ static const uint16_t framesPlacesSynth[1][4] = {
 };
 
 const char* const synthModelNames[Synth::kSynthTypes.size()] = {
-    "ACD", "FAT", "VAP", "WTFM", "PERC", "DIRT", "CHIP",
+    "ACD", "FAT", "VAP", "WTFM", "PERC", "DIRT", "CHIP", "KIT",
 };
 
 static const int synthModelListImages[Synth::kSynthTypes.size()] = {
     enDisplayBitmaps::kBitmapMiniACD,  enDisplayBitmaps::kBitmapMiniFAT,
     enDisplayBitmaps::kBitmapMiniVAP,  enDisplayBitmaps::kBitmapMiniWTFM,
     enDisplayBitmaps::kBitmapMiniPERC, enDisplayBitmaps::kBitmapMiniDIRT,
-    enDisplayBitmaps::kBitmapMiniCHIP
+    enDisplayBitmaps::kBitmapMiniCHIP,
+    enDisplayBitmaps::kBitmapMiniKIT
 };
 
 static cInstrumentEditor* IE = &instrumentEditor;
@@ -56,6 +57,8 @@ static void functSynthShift(uint8_t state);
 
 void cInstrumentEditor::exitSynthEditor()
 {
+    if (auto event = kitPreview.release())
+        getSynth()->triggerTestNote(event->part, event->note, false);
     if (!isSynthInstrument(mtProject.values.lastUsedInstrument))
     {
         return;
@@ -132,6 +135,28 @@ static void functSynthPads(uint8_t pad, uint8_t state, int16_t)
 
 void cInstrumentEditor::synthCommonPreviewButtonFunct(uint8_t state)
 {
+    if (state == buttonRelease)
+    {
+        if (auto event = kitPreview.release())
+        {
+            getSynth()->triggerTestNote(event->part, event->note, false);
+            return;
+        }
+    }
+    if (isSynthInstrument(mtProject.values.lastUsedInstrument))
+    {
+        const int part = instrumentIdxToSynthIdx(mtProject.values.lastUsedInstrument);
+        if (getSynth()->isDrumKit(part))
+        {
+            if (state == buttonPress)
+            {
+                const int section = mode == mtInstEditModeSynthPatchEdit ? sectionListPos : 0;
+                if (auto event = kitPreview.press(part, section))
+                    getSynth()->triggerTestNote(event->part, event->note, true);
+            }
+            return;
+        }
+    }
     static uint8_t lastState = buttonRelease;
 
     if (state == lastState)
@@ -249,7 +274,11 @@ static void functSynthActionButtons(uint8_t button)
 
 static void functSynthLoad()
 {
-    IE->browsePatchList();
+    if (!IE->browsePatchList())
+    {
+        mtPopups.show(0, "No presets for this model - use Init");
+        return;
+    }
     IE->showSynthPatchBrowser();
 
     IE->ip->clearAllPots();

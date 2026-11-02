@@ -1,6 +1,7 @@
 #ifdef FEATURE_SYNTH
 
 #include "Synth.h"
+#include "SynthModelMigration.h"
 #include "FileSystemAdapter.h"
 #include "MidiAdapter.h"
 #include "config.h"
@@ -385,7 +386,8 @@ void Synth::updateToSettings(const strMtValues& settings, bool resetAllVoices)
     for (int part = 0; part < kSynthParts; part++)
     {
         setVoiceCount(part, settings.synthPart[part].voiceCount);
-        setInstrumentType(part, kSynthTypes.at(settings.synthPart[part].synthType));
+        setInstrumentType(
+          part, kSynthTypes.at(normalizeSynthModelIndex(settings.synthPart[part].synthType)));
         parts[part].patchName = settings.synthPart[part].patchName;
     }
 }
@@ -417,6 +419,7 @@ void Synth::initSynthPartMacroValue(int part, int macroIdx, SynthPartSettings& s
 
 void Synth::validateSynthPartSettings(int part, SynthPartSettings& settings)
 {
+    settings.synthType = normalizeSynthModelIndex(settings.synthType);
 
     bool anyMacroValueIsOurRange = false;
     for (auto macroValue : settings.macroValue)

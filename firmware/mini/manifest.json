@@ -1,0 +1,21 @@
+{
+  "project": "Lumen KIT",
+  "version": "0.1.0",
+  "status": "proof of concept",
+  "authors": [
+    "KRUChY",
+    "Lumen (AI engineering collaborator)"
+  ],
+  "target": "Polyend Tracker Mini",
+  "ce_base_version": "1.0.0",
+  "build_tag": "808p03",
+  "firmware": "TrackerMini_KIT_0.1.0.ptf",
+  "sha256": "b44305f42db132b1c8c1476e7582a51f531fdb0a8b30f3d03b17a2014c43b074",
+  "intel_hex": {
+    "origin": "0x60020000",
+    "end_exclusive": "0x601c201c",
+    "payload_bytes": 1712156
+  },
+  "matches_user_confirmed_808p03_image": true,
+  "upstream_commit": "9b9a13b56fef94710e5c1d4bf1a321681080a6c8"
+}

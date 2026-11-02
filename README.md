@@ -1,167 +1,146 @@
-# Polyend Tracker Community Edition (CE)
+<p align="center"><img src="docs/assets/kit-banner.svg" alt="Lumen KIT 0.1 — six drum voices, one SYN part" width="100%"></p>
 
-Welcome to the **Polyend Tracker Community Edition** repository!
+# Lumen KIT · 0.1
 
-Built directly from the original Polyend firmware source code, Tracker CE opens up the Polyend Tracker platform to musicians, sound designers, and developers around the world. Whether you are here to flash the latest Community Edition firmware, want to build your own idea on the Tracker, design custom themes and fonts, write Sample Editor plugins, or build new synthesizer engines, we are excited to have you here.
+**A small drum machine inside your Polyend Tracker Mini.**
 
-This unified codebase powers all three hardware instruments in the Tracker family:
-* **Original Polyend Tracker** (`NXP Kinetis MK66FX1M0`, Cortex-M4F @ 180 MHz)
-* **Polyend Tracker+ & Tracker Mini** (`NXP i.MX RT1051/RT1064`, Cortex-M7 @ 600 MHz)
+Six synthesized voices, one SYN part: bass drum, snare, closed hi-hat, hand clap,
+open hi-hat and cowbell. Program each drum on its own tracker lane, shape it per
+step, and keep SYN 2 and SYN 3 free for the rest of the track.
 
-### What's New:
-See [`CHANGELOG.md`](CHANGELOG.md) for the full list of new features and improvements.
+**By KRUChY & Lumen.** Built on [Polyend Tracker Community Edition](https://github.com/polyend/tracker-ce).
 
+> **Version 0.1 is a proof of concept — an exploration of what is possible.**
+> This is an experimental community firmware project, not a finished product or
+> an official Polyend release. KRUChY has confirmed basic operation on a Tracker
+> Mini. Complex projects, CPU limits and long-session stability need more testing.
 
-## Notice: Official Support, Warranty & Hardware Disclaimer
+[Polski](README.pl.md) · [Download Mini firmware](firmware/mini/TrackerMini_KIT_0.1.0.ptf)
+· [Releases](https://github.com/mkruszyniak-omarchy/lumen-kit-tracker/releases)
+· [Build it yourself](BUILDING.md) · [Detailed KIT guide](docs/drum_kit.md)
 
-> **A Quick Note Before Flashing or Modifying Firmware**
->
-> Thanks to the Tracker's isolated bootloader and hardware emergency recovery button (see [Flashing on Hardware & Emergency Recovery](#4-flashing-on-hardware--emergency-recovery)), experimenting with Community Edition builds is very safe. Even if a custom build fails to boot, you can easily re-flash a stable `.ptf` image from your microSD card. That said, we still need to include the standard legal disclaimer just in case:
->
-> * **Provided "AS IS" Without Support Obligation**: While the foundation of this repository was originally developed and released by **Polyend**, the **Polyend Tracker Community Edition (CE)** firmware, source code, and any community-developed modifications or plugins are provided **"AS IS"**, without warranty of any kind, express or implied. **Polyend has no obligation to provide official technical support, maintenance, bug fixes, or customer service** for Community Edition firmware or custom builds.
-> * **Use at Your Own Risk**: Flashing, modifying, or running custom firmware is done at your own discretion and risk. Polyend is not liable for any data loss, project corruption, malfunction, or hardware damage (including "bricking" a device or issues caused by code modifications) arising from the use of this software.
-> * **Out-of-Warranty Repairs Available**: In the unlikely event that something ever goes wrong with your hardware while using custom firmware, it is **not covered under standard warranty**. However, **Polyend is always happy to help get your instrument back up and running through its official out-of-warranty repair service** (standard service, parts, and shipping fees apply. See [How to Contact Polyend Customer Support](https://backstage.polyend.com/t/how-to-contact-the-polyend-customer-support/15510)).
+## What makes it a KIT?
 
----
+- **Six separate drum generators**, each with its own envelope and settings.
+- **One SYN instrument across several pattern tracks**; drum notes choose the voice.
+- **Per-drum controls:** Pitch, Decay, Tone/Snappy/Metal/Balance, Drive, Level and Pan.
+- **Track-specific a–f effects:** a snare decay lock does not rewrite a ringing kick.
+- **Stereo pan, independent delay/reverb sends, and closed-hat/open-hat choking.**
+- **Section-aware audition:** preview the drum you are editing, including outside REC
+  during Song Mode, without needing a free sequencer lane.
+- **One custom KIT engine.** The earlier standalone KFM experiment has been removed.
 
-## Repository Structure
+The default sounds take inspiration from the TR-808's character and generator
+structure. This is original digital DSP, not a circuit-accurate Roland emulation.
 
-```text
-.
-├── Makefile                # Unified top-level build & version management
-├── version.mk              # Centralized version & build number configuration
-├── CHANGELOG.md            # Release history & feature highlights
-├── CONTRIBUTING.md         # Contribution rules & hardware testing workflow
-├── LICENSE                 # PolyForm Noncommercial 1.0.0 (+ Music Use & MIT for .ptfx SDK)
-├── NOTICE.md               # Third-party open-source attributions
-├── core/                   # Shared Tracker application, audio engine, UI & open synth engines
-├── platforms/
-│   ├── mk66/               # Original Tracker (Kinetis MK66) HAL, drivers & linker scripts
-│   └── imx/                # Tracker+ & Tracker Mini (i.MX RT1051) HAL, drivers & linker scripts
-├── synth/
-│   ├── include/PolySynth/  # PolySynth public headers & Open Synth SDK (synth/include/PolySynth/sdk/)
-│   └── lib/                # Precompiled libPolySynth.a & libPolyDSP.a + LICENSE-PROPRIETARY.txt
-├── util/                   # Shared C++ utility headers & third-party header libraries (ETL, magic_enum)
-├── editor-fx-sdk/          # .ptfx Sample Editor plugin SDK, builder & effects/ sources
-└── docs/                   # User guides, SDK tutorials & architecture documentation
-```
+## Hear it
 
----
+[Six voices in order: BD → SD → CH → CP → OH → CB](examples/audio/kit-0.1-voices.wav)
+· [One-part KIT demo at 120 BPM](examples/audio/kit-0.1-demo-120bpm.wav)
 
-## Guiding Principles of the Community Edition Firmware
+These WAVs are desktop renders of the same SDK/DSP code, without the Tracker's
+master processing or analog output stage.
 
-This repository prioritizes workflow continuity: our aim is to respect existing muscle memory, introduce features, optimizations and improvements that fit the original vision of the device, while fixing bugs along the way.
+## Install on Tracker Mini
 
-If you have ideas for major workflow adjustments or structural changes, please open a [GitHub Discussion](https://github.com/polyend/tracker-ce/discussions) or a topic on the [Polyend Backstage Forum](https://backstage.polyend.com/) first, so we can align on direction together with the community.
+1. Back up the microSD card and keep a known-good Mini firmware image.
+2. Download [`TrackerMini_KIT_0.1.0.ptf`](firmware/mini/TrackerMini_KIT_0.1.0.ptf)
+   and copy it into `/Firmware/` on the card.
+3. On the Mini, open **Config → Firmware → Firmware update** and select that file.
+4. In a new test project, select **SYN 1 → KIT → Edit Patch → Init** and use **1 voice**.
+5. Select **SYN 1 on each drum track**, then enter the notes below.
 
-For radical experiments or reimagined interfaces, we actively encourage community forks!
+| Note / MIDI | Drum | Starting character |
+| --- | --- | --- |
+| C4 / 60 | **BD · Bass Drum** | low sine body, short pitch transient |
+| D4 / 62 | **SD · Snare** | tonal body and a separate snappy noise layer |
+| E4 / 64 | **CH · Closed Hi-Hat** | short metallic tick |
+| F4 / 65 | **CP · Hand Clap** | repeated noise attacks and a diffuse tail |
+| G4 / 67 | **OH · Open Hi-Hat** | longer metallic wash |
+| A4 / 69 | **CB · Cowbell** | two square oscillators and a shaped decay |
 
----
+The map repeats in every octave; adjacent black keys are aliases. This is a KIT
+map, not General MIDI. Notes select drums; the Pitch control tunes them.
+**Use Init to hear the new defaults:** an already saved patch keeps its values.
 
-## Contributing
+**Version labels:** the KIT release is **0.1.0**. The included, user-tested image
+retains the upstream CE base version **1.0.0** and Build **808p03**. It is byte-for-byte
+the image confirmed on the Mini; the release filename does not alter the firmware.
+See [firmware details and checksums](firmware/mini/README.md). This image is **Mini only**.
 
-We welcome community contributions! ❤️
+## Build on Linux x86_64
 
-From bug fixes and workflow improvements to new open-source synth engines and `.ptfx` Sample Editor plugins. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) for our project philosophy, pull request rules, hardware testing workflow, and technical checklist before opening a Pull Request.
-
----
-
-## Building Firmware
-
-### 1. Prerequisites
-* **[GNU Arm Embedded Toolchain `10.3-2021.10`](https://developer.arm.com/downloads/-/gnu-rm)**:
-  * Direct official downloads from Arm:
-    * **Linux (`x86_64`)**: [`gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2`](https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2)
-    * **Linux (`aarch64` / ARM64)**: [`gcc-arm-none-eabi-10.3-2021.10-aarch64-linux.tar.bz2`](https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-aarch64-linux.tar.bz2)
-    * **macOS (`x86_64` / Apple Silicon via Rosetta)**: [`gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2`](https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2)
-    * **Windows (ZIP)**: [`gcc-arm-none-eabi-10.3-2021.10-win32.zip`](https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip)
-  * Ensure `arm-none-eabi-gcc` is on your `PATH`, extract the toolchain into `./agt/10.3/`, or pass `TOOLCHAIN=/path/to/arm-none-eabi-` to `make`.
-* `make` (for building firmware) and `python3` (used by `make ptfx` to package `.ptfx` Sample Editor plugins and by the `make bump-*` version helpers; standard library only).
-
-### 2. Build Commands
-From the repository root:
+Prerequisites: `git`, `make`, `python3`, `curl`, `tar`, `bzip2`, `sha256sum`.
+The firmware uses **GNU Arm Embedded 10.3-2021.10**. The bootstrap script installs
+it locally inside the checkout, with no administrator privileges.
 
 ```bash
-# Build all three devices (Original Tracker, Tracker+, Tracker Mini)
-make all
-
-# Or build a single target:
-make original   # -> build/PolyendTracker_CE_1.0.0.ptf
-make plus       # -> build/TrackerPlus_CE_1.0.0.ptf
-make mini       # -> build/TrackerMini_CE_1.0.0.ptf
-
-# Build reference .ptfx Sample Editor effects into editor-fx-sdk/build/Effects/:
-make ptfx
-
-# Clean all build directories:
-make clean
+git clone https://github.com/mkruszyniak-omarchy/lumen-kit-tracker.git
+cd lumen-kit-tracker
+bash scripts/bootstrap-toolchain.sh
+bash scripts/build-kit-mini.sh
 ```
 
-### 3. Version Management (`version.mk`)
-All firmware version numbers are defined in [`version.mk`](version.mk). The **Build** identifier displayed on the hardware under **Config > Firmware > Build** is automatically populated from the short Git commit hash (`git rev-parse --short=7 HEAD`):
+Output: **`dist/TrackerMini_KIT_0.1.0.ptf`**, a release ZIP with installation
+instructions and license notices, and `dist/SHA256SUMS`.
+Use `NPROC=4 bash scripts/build-kit-mini.sh` to change parallel build jobs.
+
+Already have the pinned toolchain?
 
 ```bash
-# Show current version, Git build hash & output filenames
-make version
-
-# Increment patch version (e.g. 1.0.0 -> 1.0.1)
-make bump-patch TARGET=all        # or TARGET=original | TARGET=plus | TARGET=mini
-
-# Increment minor version (e.g. 1.0.x -> 1.1.0)
-make bump-minor TARGET=all        # or TARGET=original | TARGET=plus | TARGET=mini
+make mini NPROC=6 TOOLCHAIN=/path/to/bin/arm-none-eabi- BUILD_TAG=808p03
 ```
 
-### 4. Flashing on Hardware & Emergency Recovery
+That creates `build/TrackerMini_CE_1.0.0.ptf`; the wrapper packages it as a KIT release.
+See [BUILDING.md](BUILDING.md) for toolchain verification, manual packaging and other targets.
 
-1. Copy the generated `.ptf` file from `build/` (`PolyendTracker_*.ptf`, `TrackerPlus_*.ptf`, or `TrackerMini_*.ptf`) to the `/Firmware/` folder on your Tracker's microSD card.
-   * *Note*: Keep `.ptf` filenames at **31 characters or fewer** so the Original Tracker's 32-byte `/Firmware/_fwinfo` bootloader buffer remains null-terminated.
-2. On the device, open **Config > Firmware > Firmware update**, select the `.ptf` file, and confirm.
+## Play and shape
 
-> **Bootloader Resilience & Emergency Firmware Recovery**:
-> * The Polyend Tracker bootloader is isolated from the application firmware:
->   * On the **Original Tracker (`MK66`)**, the bootloader runs on a separate dedicated microcontroller (`kBootloaderTrig`).
->   * On **Tracker+ and Tracker Mini (`IMX`)**, the bootloader resides in a protected region at the bottom of QSPI Flash (`0x60000000`–`0x6002FFFF`), while `.ptf` application builds are linked starting at `0x60030000` (do not modify the flash `ORIGIN` address in the linker scripts).
-> * **Emergency Recovery**: If a custom firmware build ever hangs or fails to boot into the UI, you can always recover your device:
->   1. Place a known-good, stable `.ptf` firmware file for your device inside the `/Firmware/` folder on your microSD card (ideally as the only `.ptf` file in `/Firmware/`).
->   2. Insert the microSD card into your Tracker and power it on.
->   3. Use a paperclip or SIM-eject pin to press the **recessed hardware Reset / Emergency Bootloader pinhole button** (located on the bottom of the Original Tracker / Tracker+, or next to the USB-C port on Tracker Mini). The hardware bootloader will automatically pick up the `.ptf` file from `/Firmware/` and flash it.
+**a Pitch · b Decay · c Tone/Snappy/Metal/Balance · d Drive · e Level · f Pan**.
+Effect value **63** is neutral. Each track has its own two effect slots; FX1 wins
+when both target the same control. OFF clears a slot. The SYN macro knobs provide
+shared kit offsets, while pattern effects target the drum on that track.
 
----
+Settings are captured at each hit so other drums keep their tails. The ordinary
+Tracker mixer still controls the whole SYN part; KIT calculates its own drum pan
+and send buses. [Routing, sends, Mute/Stop and migration details](docs/drum_kit.md).
 
-## Documentation & Developer Guides
+## Status and tests
 
-Full user and developer documentation is available in [`docs/`](docs/Home.md) and on the repository **Wiki**:
+| Platform | Status |
+| --- | --- |
+| **Tracker Mini** | Basic operation confirmed by KRUChY; included release image |
+| **Tracker+** | Compiles; physical hardware testing still needed |
+| **Original Tracker** | Base firmware compiles; **KIT is not supported** on this platform |
 
-* **User Guides**:
-  * [Custom Themes & Fonts](docs/custom_themes_and_fonts.md) + [Live Web Editor](https://polyend.github.io/tracker-theme-editor/) ([`polyend/tracker-theme-editor`](https://github.com/polyend/tracker-theme-editor))
-  * [Wavetable Envelopes, LFOs & Step FX](docs/wavetable_envelopes.md)
-  * [SD Card Image Viewer](docs/image_viewer.md)
-* **Developer & Architecture Guides**:
-  * [Firmware Architecture, Hardware Limits & Developer Gotchas](docs/developer_guide.md)
-  * [Custom Synth Engine SDK](docs/custom_synth_sdk.md)
-  * [Modular Sample Editor Effects & `.ptfx` Developer SDK](docs/modular_effects_system.md)
+```bash
+bash tools/drum-kit/verify.sh
+```
 
----
+The desktop harness compiles the actual KIT SDK adapter/DSP with ASan/UBSan and
+requires a C++20-capable `g++`. It checks simultaneous drums, track FX isolation,
+six-section preview, all 128 keyboard notes, sound-spectrum differences,
+stereo/sends and 48 boundary/random kits. It does not exercise the closed-source
+PolySynth allocator/serializer or the physical UI.
 
-## Polyend Tracker Open-Source Ecosystem
+Expect rough edges: there is no full analog circuit model or oversampling, aliasing
+is possible, and performance limits remain to be measured on hardware. DIRT and
+CHIP remain upstream synth engines; this project does not bundle preset banks for them.
 
-This repository is part of a growing open-source ecosystem around the Polyend Tracker family:
+## Authors, upstream and licensing
 
-* **[`polyend/tracker-theme-editor`](https://github.com/polyend/tracker-theme-editor)** ([Live Web App](https://polyend.github.io/tracker-theme-editor/)): Browser-based visual **Theme & Font Editor** with a hardware screen simulator.
-* **[`polyend/tracker-lib`](https://github.com/polyend/tracker-lib)**: Open-source library and tools for reading, writing, and inspecting Polyend Tracker project (`.mt`), pattern (`.mtp`), and instrument (`.pti`) files.
-* **[Polyend Backstage Forum](https://backstage.polyend.com/)**: Community forum for sharing custom themes, fonts, `.ptfx` plugins, synth engines, and discussing workflows.
-* **[The Tracker Overflow (Discord)](https://discord.com/invite/uEPTnwckJV)**: Unofficial Polyend Tracker Discord where users and developers can join, chat, and find like-minded people.
+**KRUChY & Lumen** — [authorship and roles](AUTHORS.md).
+Lumen is the AI engineering collaborator in this project.
 
----
+Based on upstream commit `9b9a13b56fef94710e5c1d4bf1a321681080a6c8` from
+[Polyend Tracker CE](https://github.com/polyend/tracker-ce). The original project
+README is preserved in [UPSTREAM_README.md](docs/UPSTREAM_README.md).
 
-## License
+The original [LICENSE](LICENSE), [NOTICE.md](NOTICE.md), and
+[binary-library license](synth/lib/LICENSE-PROPRIETARY.txt) are retained.
+Firmware source uses PolyForm Noncommercial with Polyend's additional permissions;
+the `.ptfx` SDK has separate MIT terms. The included unmodified PolySynth/PolyDSP
+archives are provided for firmware targeting authentic Polyend hardware.
 
-* **Firmware Source Code, Headers, Open Synth SDK (`synth/include/`), and Documentation (`docs/`)**: Licensed under the **PolyForm Noncommercial License 1.0.0 with Polyend Additional Permissions** (see [`LICENSE`](LICENSE)).
-  * **Musicians & Creators**: Using the firmware for commercial music production, albums, paid live performances/gigs, sample packs, and monetized streaming/YouTube content is **expressly permitted**.
-  * **No Selling of Firmware or Competing Products**: Selling the firmware or derivative software, or embedding any part of the codebase into competing commercial hardware or software products, is prohibited.
-    
-* **`.ptfx` Sample Editor FX SDK (`editor-fx-sdk/`)**: Licensed under the **MIT License** (see Part 3 of [`LICENSE`](LICENSE)). Developers may freely build, distribute, and sell `.ptfx` plugins.
-  
-* **Precompiled Synth & DSP Libraries (`synth/lib/libPolySynth.a`, `synth/lib/libPolyDSP.a`)**: Provided under the [Polyend Precompiled Synthesizer & DSP Library License](synth/lib/LICENSE-PROPRIETARY.txt) for building firmware targeting authentic Polyend hardware.
-  
-* **Third-Party Components**: See [`NOTICE.md`](NOTICE.md).
+TR-808 is a Roland trademark. This project is not affiliated with Roland and is
+not an official or supported Polyend firmware release.

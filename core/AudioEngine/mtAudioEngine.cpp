@@ -3,6 +3,8 @@
 #include "VoiceStreamManager.h"
 #ifdef FEATURE_SYNTH
 #include "PolySynth/sdk/SynthVoiceSDK.h"
+#include "Synth.h"
+#include "TrackerImpl.h"
 #endif
 #include "SynthVoice.h"
 #include "ampLogarythmicValues.h"
@@ -813,6 +815,7 @@ AUDIO_CORE_RAM void audioEngine::endAllFx(bool synthOnly)
 #ifdef FEATURE_SYNTH
     for (int synthIdx = 0; synthIdx < kSynthParts; synthIdx++)
     {
+        TrackerImpl::getInstance()->getSynth().resetDrumKitFx(synthIdx);
         for (auto& fxIdAndSynthParam : fxIdToSynthParam)
         {
             endSynthFx(fxIdAndSynthParam.first, 0, synthIdx);

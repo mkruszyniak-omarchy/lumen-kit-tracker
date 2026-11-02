@@ -7,5 +7,5 @@ contact_links:
     url: https://discord.com/invite/uEPTnwckJV
     about: Join the unofficial Polyend Tracker Discord where users and developers can connect and find like-minded people.
   - name: Developer Documentation & Hardware Limits
-    url: https://github.com/polyend/tracker-ce#documentation--developer-guides
-    about: Read the Memory Budget, Open Synth SDK, and .ptfx Plugin documentation in README.md and docs/.
+    url: https://github.com/mkruszyniak-omarchy/lumen-kit-tracker/blob/main/BUILDING.md
+    about: Read the KIT build instructions, quick start and hardware testing status.

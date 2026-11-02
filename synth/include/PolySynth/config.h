@@ -40,7 +40,9 @@ enum class InstrumentTypeId
     kDrumSynth,
     kShapingSynth,
     kChiptuneSynth,
-    kLastSynth = kChiptuneSynth,
+    // ID 9 belonged to the removed KFM engine; do not reuse/renumber it.
+    kDrumKitSynth = 10,
+    kLastSynth = kDrumKitSynth,
     kDelay = 1000,
     kReverb,
 };

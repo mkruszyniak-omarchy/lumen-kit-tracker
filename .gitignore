@@ -3,6 +3,7 @@ agt/
 
 # Build outputs
 /build/
+/dist/
 core/build-*/
 platforms/mk66/build/
 platforms/imx/build-*/
@@ -10,6 +11,7 @@ editor-fx-sdk/build/
 *.axf
 *.lss
 *.ptf
+!firmware/mini/*.ptf
 *.ptfx
 *.o
 *.d
